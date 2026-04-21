@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   libft.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tobschmi <tobschmi@student.42vienna.c      +#+  +:+       +#+        */
+/*   By: tobschmi <tobschmi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/29 12:55:37 by tobschmi          #+#    #+#             */
-/*   Updated: 2025/10/22 20:20:45 by tobschmi         ###   ########.fr       */
+/*   Updated: 2026/04/21 23:29:45 by tobschmi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,6 @@
 # define LIBFT_H
 
 # include <stddef.h>
-# include "ft_printf/ft_printf.h"
 
 int		ft_isalpha(int c);
 int		ft_isdigit(int c);

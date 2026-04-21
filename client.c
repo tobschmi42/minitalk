@@ -1,19 +1,34 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   client.c                                           :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: tobschmi <tobschmi@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/04/21 18:09:35 by tobschmi          #+#    #+#             */
+/*   Updated: 2026/04/21 23:38:21 by tobschmi         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include <unistd.h>
 #include <signal.h>
+#include <stdlib.h>
 #include "libft/libft.h"
 
-int g_pause;
+volatile int	g_pause;
 
 static void	signal_handler(int signal)
 {
-	(void) signal;
-	g_pause = 1;
+	if (signal == SIGUSR1)
+		g_pause = 1;
+	else
+		exit(0);
 }
 
-static void send_bit(char character, size_t position, int pid)
+static void	send_bit(char character, size_t position, int pid)
 {
 	if ((character >> position) & 1)
-		kill(pid , SIGUSR1);
+		kill(pid, SIGUSR1);
 	else
 		kill (pid, SIGUSR2);
 }
