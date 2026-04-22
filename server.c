@@ -6,7 +6,7 @@
 /*   By: tobschmi <tobschmi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/21 18:09:43 by tobschmi          #+#    #+#             */
-/*   Updated: 2026/04/21 23:40:50 by tobschmi         ###   ########.fr       */
+/*   Updated: 2026/04/22 23:25:37 by tobschmi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,19 @@
 #include <signal.h>
 #include <stdint.h>
 #include <unistd.h>
+#include <stdlib.h>
+#include "server.h"
+
+static volatile  t_server	siginfo;
+
+static void	safe_kill(int pid, int sig)
+{
+	if (kill(sig, pid) == -1)
+	{
+		ft_putstr_fd("Error when trying to send to client.", 1);
+		exit(-1);
+	}
+}
 
 static int	message_handler(int sig)
 {
@@ -42,25 +55,36 @@ static int	message_handler(int sig)
 	return (0);
 }
 
-static void	signal_handler(int sig, siginfo_t *info, void *ucontext)
+static void	signal_processor()
 {
 	static int	pid = 0;
-	
-	(void) ucontext;
+
 	if (!pid)
-		pid = info->si_pid;
-	if (pid != info->si_pid)
-		kill(info->si_pid, SIGUSR2);
+		pid = siginfo.pid;
+	if (pid != siginfo.pid)
+		kill(siginfo.pid, SIGUSR2);
 	else
 	{
-		if (message_handler(sig))
+		if (message_handler(siginfo.sig))
 		{
 			pid = 0;
-			kill(info->si_pid, SIGUSR2);
+			safe_kill(siginfo.pid, SIGUSR2);
 		}
 		else
-			kill(info->si_pid, SIGUSR1);
+			safe_kill(pid, SIGUSR1);
 	}
+}
+
+static void	signal_handler(int sig, siginfo_t *info, void *ucontext)
+{
+	(void)ucontext;
+	siginfo.pid = info->si_pid;
+	if (sig == SIGUSR1)
+		siginfo.sig = SIGUSR1;
+	else if (sig == SIGUSR2)
+		siginfo.sig = SIGUSR2;
+	else
+		siginfo.sig = 0;
 }
 
 int	main(void)
@@ -75,5 +99,8 @@ int	main(void)
 	sigaction(SIGUSR1, &s_act, NULL);
 	sigaction(SIGUSR2, &s_act, NULL);
 	while (1)
-		;
+	{
+		pause();
+		signal_processor();
+	}
 }
