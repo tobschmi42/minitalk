@@ -46,7 +46,7 @@ int	main(int num, char **args)
 	sigemptyset(&s_act.sa_mask);
 	s_act.sa_flags = 0;
 	sigaction(SIGUSR1, &s_act, NULL);
-	while (str_runner < ft_strlen(args[2]))
+	while (str_runner <= ft_strlen(args[2]))
 	{
 		bit_runner = 8;
 		while (bit_runner != 0)

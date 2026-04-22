@@ -32,7 +32,6 @@ static int	message_handler(int sig)
 		progress = 0;
 		string[str_runner] = character;
 		str_runner++;
-		character = 0;
 		if (character == '\0')
 		{
 			str_runner = 0;
@@ -45,18 +44,18 @@ static int	message_handler(int sig)
 
 static void	signal_handler(int sig, siginfo_t *info, void *ucontext)
 {
-	static int	*pid = NULL;
+	static int	pid = 0;
 	
 	(void) ucontext;
 	if (!pid)
-		*pid = info->si_pid;
-	if (*pid != info->si_pid)
+		pid = info->si_pid;
+	if (pid != info->si_pid)
 		kill(info->si_pid, SIGUSR2);
 	else
 	{
 		if (message_handler(sig))
 		{
-			pid = NULL;
+			pid = 0;
 			kill(info->si_pid, SIGUSR2);
 		}
 		else
