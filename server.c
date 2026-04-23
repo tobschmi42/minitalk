@@ -21,7 +21,7 @@ static volatile  t_server	siginfo;
 
 static void	safe_kill(int pid, int sig)
 {
-	if (kill(sig, pid) == -1)
+	if (kill(pid, sig) == -1)
 	{
 		ft_putstr_fd("Error when trying to send to client.", 1);
 		exit(-1);
