@@ -6,27 +6,18 @@
 /*   By: tobschmi <tobschmi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/21 18:09:43 by tobschmi          #+#    #+#             */
-/*   Updated: 2026/04/22 23:25:37 by tobschmi         ###   ########.fr       */
+/*   Updated: 2026/04/23 11:01:45 by tobschmi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libft/libft.h"
 #include <signal.h>
 #include <stdint.h>
 #include <unistd.h>
 #include <stdlib.h>
-#include "server.h"
+#include "helper.h"
+#include "libft/libft.h"
 
 static volatile  t_server	siginfo;
-
-static void	safe_kill(int pid, int sig)
-{
-	if (kill(pid, sig) == -1)
-	{
-		ft_putstr_fd("Error when trying to send to client.", 1);
-		exit(-1);
-	}
-}
 
 static int	message_handler(int sig)
 {
@@ -68,10 +59,10 @@ static void	signal_processor()
 		if (message_handler(siginfo.sig))
 		{
 			pid = 0;
-			safe_kill(siginfo.pid, SIGUSR2);
+			safe_kill(siginfo.pid, SIGUSR2, "Error when trying to commincate with client.");
 		}
 		else
-			safe_kill(pid, SIGUSR1);
+			safe_kill(pid, SIGUSR1, "Error when trying to commincate with client.");
 	}
 }
 

@@ -1,9 +1,11 @@
 CC=cc
 CFLAGS=-Wextra -Wall -Werror
 
-SRCS_CLIENT = client.c
+SRCS_HELPER = helper.c
+OBJS_HELPER = $(SRCS_HELPER:.c=.o)
+SRCS_CLIENT = client.c $(SRCS_HELPER)
 OBJS_CLIENT = $(SRCS_CLIENT:.c=.o)
-SRCS_SERVER = server.c
+SRCS_SERVER = server.c $(SRCS_HELPER)
 OBJS_SERVER = $(SRCS_SERVER:.c=.o)
 
 NAME_CLIENT = client
