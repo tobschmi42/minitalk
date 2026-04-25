@@ -6,7 +6,7 @@
 /*   By: tobschmi <tobschmi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/21 18:09:35 by tobschmi          #+#    #+#             */
-/*   Updated: 2026/04/23 11:01:32 by tobschmi         ###   ########.fr       */
+/*   Updated: 2026/04/25 22:45:45 by tobschmi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,19 +22,20 @@ static void	signal_handler(int signal)
 {
 	if (signal == SIGUSR1)
 		g_pause = 1;
-	else
-	{
-		ft_putendl_fd("Server closed Connection", 1);
-		exit(0);
-	}
+	else if (signal == SIGUSR2)
+		g_pause = 2;
 }
 
 static void	send_bit(char character, size_t position, int pid)
 {
+	int error;
+
 	if ((character >> position) & 1)
-		safe_kill(pid, SIGUSR1, "Error when trying to commincate with server.");
+		error = safe_kill(pid, SIGUSR1, "Error when commincating with server\n");
 	else
-		safe_kill(pid, SIGUSR2, "Error when trying to commincate with server.");
+		error = safe_kill(pid, SIGUSR2, "Error when commincating with server\n");
+	if (error)
+		exit (1);
 }
 
 static int	communication_handler(char *string, int pid)
@@ -52,7 +53,7 @@ static int	communication_handler(char *string, int pid)
 			g_pause = 0;
 			send_bit(string[str_runner], bit_runner - 1, pid);
 			wait = 0;
-			while (g_pause == 0 || wait >= 90)
+			while (g_pause == 0 && wait <= 90)
 			{
 				usleep(10);
 				++wait;
@@ -87,6 +88,6 @@ int	main(int num, char **args)
 			return (1);
 		}
 	 }
-	 ft_putendl_fd("Message sent successfully", 1);
+	 //ft_putendl_fd("Message sent successfully", 1);
 	 return (0);
 }
