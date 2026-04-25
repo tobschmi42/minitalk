@@ -6,7 +6,7 @@
 /*   By: tobschmi <tobschmi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/21 18:09:43 by tobschmi          #+#    #+#             */
-/*   Updated: 2026/04/25 23:48:08 by tobschmi         ###   ########.fr       */
+/*   Updated: 2026/04/26 00:30:21 by tobschmi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,10 +108,12 @@ int	main(void)
 		{
 			pause();
 			mode = 0;
+			wait = 0;
 		}
 		else if (mode == 1)
 		{
-			if (wait >= 900)
+			wait = 0;
+			if (wait >= 9000)
 			{
 				safe_kill(siginfo.c_pid, SIGUSR2, "Failed to shutdown client after Timeout");
 				message_handler(0);
@@ -119,9 +121,11 @@ int	main(void)
 				mode = 2;
 			}
 			if (siginfo.new_bit == 1)
+			{
 				mode = signal_processor(mode);
+			}
 			++wait;
-			usleep(10);
+			usleep(100);
 		}
 		else
 		{

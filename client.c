@@ -6,7 +6,7 @@
 /*   By: tobschmi <tobschmi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/21 18:09:35 by tobschmi          #+#    #+#             */
-/*   Updated: 2026/04/25 22:45:45 by tobschmi         ###   ########.fr       */
+/*   Updated: 2026/04/26 00:15:51 by tobschmi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,12 +53,12 @@ static int	communication_handler(char *string, int pid)
 			g_pause = 0;
 			send_bit(string[str_runner], bit_runner - 1, pid);
 			wait = 0;
-			while (g_pause == 0 && wait <= 90)
+			while (g_pause == 0 && wait <= 9000)
 			{
-				usleep(10);
+				usleep(100);
 				++wait;
 			}
-			if (wait >= 90 || g_pause == 2)
+			if (wait >= 9000 || g_pause == 2)
 				return (1);
 			--bit_runner;
 		}
