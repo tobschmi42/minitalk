@@ -6,7 +6,7 @@
 /*   By: tobschmi <tobschmi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/21 18:09:35 by tobschmi          #+#    #+#             */
-/*   Updated: 2026/04/26 00:15:51 by tobschmi         ###   ########.fr       */
+/*   Updated: 2026/04/26 19:31:01 by tobschmi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ static void	signal_handler(int signal)
 
 static void	send_bit(char character, size_t position, int pid)
 {
-	int error;
+	int	error;
 
 	if ((character >> position) & 1)
 		error = safe_kill(pid, SIGUSR1, "Error commincating with server\n");
@@ -59,7 +59,7 @@ static int	communication_handler(char *string, int pid)
 				++wait;
 			}
 			if (g_pause == 2 || wait >= 90000)
-				return (1 + (str_runner == 0 && wait <= 90000));
+				return (1 + (str_runner == 0 && wait < 90000));
 			--bit_runner;
 		}
 		++str_runner;
@@ -89,5 +89,5 @@ int	main(int num, char **args)
 		ft_putendl_fd("Failed attempt to communicate with Server", 1);
 		return (1);
 	}
-	 return (0);
+	return (0);
 }

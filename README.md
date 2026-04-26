@@ -12,9 +12,9 @@ Both the client and the server can be compiled with the make command.
 
 First the server should be started. The server will print out its own PID. Then the client should be started with two arguments. The first argument should be the PID of the server, the second argument should be the string that the server should print out.
 
-In case of an error, “Error\n” will be printed out.
+At the end of communication, the server and the client will each print out Messages stating as much. The will also print out an error message if something happens during communication.
 
-Stopping the client before the full message was sent produces undefined behaviour.
+If the client stops sendind before the full string has reached the server, the server will eventually reset itself and is ready to receive again. Client will also stop itself if the server doesn't reply after some time.
 
 ## Ressources
 
@@ -40,5 +40,7 @@ man page kill() - [https://man7.org/linux/man-pages/man2/kill.2.html](https://ma
 Explanation of Signals in C - [https://www.geeksforgeeks.org/c/signals-c-language/](https://www.geeksforgeeks.org/c/signals-c-language/)
 
 bitwise operations in C - [https://en.wikipedia.org/wiki/Bitwise\_operations\_in\_C](https://en.wikipedia.org/wiki/Bitwise_operations_in_C)  
-AI has been used to get an explanation on the sigaction structure.
 
+Manual page for usleep - [https://man7.org/linux/man-pages/man3/usleep.3.html](https://man7.org/linux/man-pages/man3/usleep.3.html)
+
+AI has been used to get an explanation on the sigaction structure.

@@ -6,7 +6,7 @@
 /*   By: tobschmi <tobschmi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/21 18:09:43 by tobschmi          #+#    #+#             */
-/*   Updated: 2026/04/26 00:30:21 by tobschmi         ###   ########.fr       */
+/*   Updated: 2026/04/26 19:28:08 by tobschmi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@
 #include "helper.h"
 #include "libft/libft.h"
 
-static volatile  t_server	siginfo;
+static volatile t_server	g_siginfo;
 
 static int	message_handler(int sig)
 {
@@ -50,50 +50,50 @@ static int	message_handler(int sig)
 
 static int	signal_processor(const int mode, int *current_pid)
 {
-	siginfo.new_bit = 0;
+	g_siginfo.new_bit = 0;
 	if (*current_pid == 0)
-		*current_pid = siginfo.new_pid;
-	if (*current_pid != siginfo.new_pid)
+		*current_pid = g_siginfo.new_pid;
+	if (*current_pid != g_siginfo.new_pid)
 	{
-		safe_kill(*current_pid, SIGUSR2, "Failed to dismiss new client.");
+		safe_kill(g_siginfo.new_pid, SIGUSR2, "Failed to dismiss new client.");
 		return (mode);
 	}
-	else if (message_handler(siginfo.sig))
+	else if (message_handler(g_siginfo.sig))
 	{
 		*current_pid = 0;
 		ft_putstr_fd("\nSuccessfully received Message\n", 1);
-		safe_kill(siginfo.new_pid, SIGUSR2, "Failed to close Connection.");
+		safe_kill(g_siginfo.new_pid, SIGUSR2, "Failed to close Connection.");
 		return (1);
 	}
 	safe_kill(*current_pid, SIGUSR1, "Failed to communincate with client.");
 	return (0);
 }
 
-static int	server_mode(int mode, int wait, int *current_pid)
+static int	server_mode(int mode, int *wait, int *current_pid)
 {
-	if (mode == 2)
+	if (mode == 1)
 	{
-		mode = 1;
-		wait = 0;
+		pause();
+		mode = 0;
+		*wait = 0;
 	}
-	if (siginfo.new_bit == 1)
+	if (g_siginfo.new_bit == 1)
 	{
 		mode = signal_processor(mode, current_pid);
-		if (*current_pid == siginfo.new_pid)
-			wait = 0; 
+		*wait = 0;
 	}
 	else
 	{
 		usleep(10);
-		wait++;
+		(*wait)++;
 	}
-	if (wait >= 90000)
+	if (*wait >= 90000)
 	{
 		ft_putstr_fd("\nTimeout: Client dropped.\n", 1);
 		message_handler(0);
 		*current_pid = 0;
-		mode = 2;
-		wait = 0;
+		mode = 1;
+		*wait = 0;
 	}
 	return (mode);
 }
@@ -101,14 +101,14 @@ static int	server_mode(int mode, int wait, int *current_pid)
 static void	signal_handler(int sig, siginfo_t *info, void *ucontext)
 {
 	(void)ucontext;
-	siginfo.new_pid = info->si_pid;
+	g_siginfo.new_pid = info->si_pid;
 	if (sig == SIGUSR1)
-		siginfo.sig = SIGUSR1;
+		g_siginfo.sig = SIGUSR1;
 	else if (sig == SIGUSR2)
-		siginfo.sig = SIGUSR2;
+		g_siginfo.sig = SIGUSR2;
 	else
-		siginfo.sig = 0;
-	siginfo.new_bit = 1;
+		g_siginfo.sig = 0;
+	g_siginfo.new_bit = 1;
 }
 
 int	main(void)
@@ -116,6 +116,7 @@ int	main(void)
 	struct sigaction	s_act;
 	int					mode;
 	int					current_pid;
+	int					wait;
 
 	ft_putnbr_fd(getpid(), 1);
 	ft_putchar_fd('\n', 1);
@@ -128,8 +129,7 @@ int	main(void)
 	sigaction(SIGUSR2, &s_act, NULL);
 	mode = 2;
 	current_pid = 0;
+	wait = 0;
 	while (1)
-    {
-		mode = server_mode(mode, 0, &current_pid);
-    }
+		mode = server_mode(mode, &wait, &current_pid);
 }
