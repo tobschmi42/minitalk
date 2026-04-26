@@ -6,7 +6,7 @@
 /*   By: tobschmi <tobschmi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/21 18:09:43 by tobschmi          #+#    #+#             */
-/*   Updated: 2026/04/26 22:20:38 by tobschmi         ###   ########.fr       */
+/*   Updated: 2026/04/26 22:26:15 by tobschmi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,12 +29,9 @@ static int	message_handler(int sig)
 	{
 		progress = 0;
 		str_runner = 0;
-		ft_bzero(string, sizeof(string));
 		return (0);
 	}
-	string[str_runner] <<= 1;
-	if (sig == SIGUSR1)
-		string[str_runner] |= 1;
+	string[str_runner] = (string[str_runner] << 1) ^ (sig == SIGUSR1);
 	++progress;
 	if (progress == 8)
 	{
