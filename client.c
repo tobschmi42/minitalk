@@ -31,9 +31,9 @@ static void	send_bit(char character, size_t position, int pid)
 	int error;
 
 	if ((character >> position) & 1)
-		error = safe_kill(pid, SIGUSR1, "Error when commincating with server\n");
+		error = safe_kill(pid, SIGUSR1, "Error commincating with server\n");
 	else
-		error = safe_kill(pid, SIGUSR2, "Error when commincating with server\n");
+		error = safe_kill(pid, SIGUSR2, "Error commincating with server\n");
 	if (error)
 		exit (1);
 }
@@ -53,13 +53,13 @@ static int	communication_handler(char *string, int pid)
 			g_pause = 0;
 			send_bit(string[str_runner], bit_runner - 1, pid);
 			wait = 0;
-			while (g_pause == 0 && wait <= 9000)
+			while (g_pause == 0 && wait <= 90000)
 			{
-				usleep(100);
+				usleep(10);
 				++wait;
 			}
-			if (wait >= 9000 || g_pause == 2)
-				return (1);
+			if (g_pause == 2 || wait >= 90000)
+				return (1 + (str_runner == 0 && wait <= 90000));
 			--bit_runner;
 		}
 		++str_runner;
@@ -70,6 +70,7 @@ static int	communication_handler(char *string, int pid)
 int	main(int num, char **args)
 {
 	struct sigaction	s_act;
+	int					result;
 
 	if (num != 3)
 		return (0);
@@ -78,16 +79,15 @@ int	main(int num, char **args)
 	s_act.sa_flags = 0;
 	sigaction(SIGUSR1, &s_act, NULL);
 	sigaction(SIGUSR2, &s_act, NULL);
-	 if (communication_handler(args[2], ft_atoi(args[1])))
-	 {
-		if (g_pause == 2)
-			ft_putendl_fd("Server closed Connection.", 1);
-		else
-		{
-			ft_putendl_fd("Error when attempting to communicate with Server", 1);
-			return (1);
-		}
-	 }
-	 //ft_putendl_fd("Message sent successfully", 1);
+	result = communication_handler(args[2], ft_atoi(args[1]));
+	if (result == 2)
+		ft_putendl_fd("Server is busy with another client.", 1);
+	else if (result == 1 && g_pause == 2)
+		ft_putendl_fd("Server closed Connection.", 1);
+	else if (result == 1)
+	{
+		ft_putendl_fd("Failed attempt to communicate with Server", 1);
+		return (1);
+	}
 	 return (0);
 }

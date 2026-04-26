@@ -25,16 +25,13 @@ static int	message_handler(int sig)
 	static char		string[2097152];
 	static size_t	str_runner = 0;
 
-	if (sig == SIGUSR2)
-		string[str_runner] = (string[str_runner] << 1);
-	else if (sig == 0)
+	if (sig == 0)
 	{
-		
 		progress = 0;
 		str_runner = 0;
 	}
 	else
-		string[str_runner] = (string[str_runner] << 1) ^ 1;
+		string[str_runner] = (string[str_runner] << 1) ^ (sig == SIGUSR1);
 	++progress;
 	if (progress == 8)
 	{
@@ -51,25 +48,54 @@ static int	message_handler(int sig)
 	return (0);
 }
 
-static int	signal_processor(const int mode)
+static int	signal_processor(const int mode, int *current_pid)
 {
 	siginfo.new_bit = 0;
-	if (!siginfo.c_pid)
-		siginfo.c_pid = siginfo.new_pid;
-	if (siginfo.c_pid != siginfo.new_pid)
+	if (*current_pid == 0)
+		*current_pid = siginfo.new_pid;
+	if (*current_pid != siginfo.new_pid)
 	{
-		safe_kill(siginfo.c_pid, SIGUSR2, "Failed to dismiss new client.");
+		safe_kill(*current_pid, SIGUSR2, "Failed to dismiss new client.");
 		return (mode);
 	}
 	else if (message_handler(siginfo.sig))
 	{
-		siginfo.c_pid = 0;
+		*current_pid = 0;
 		ft_putstr_fd("\nSuccessfully received Message\n", 1);
 		safe_kill(siginfo.new_pid, SIGUSR2, "Failed to close Connection.");
-		return (2);
+		return (1);
 	}
-	safe_kill(siginfo.c_pid, SIGUSR1, "Failed to communincate with client.");
-	return (1);
+	safe_kill(*current_pid, SIGUSR1, "Failed to communincate with client.");
+	return (0);
+}
+
+static int	server_mode(int mode, int wait, int *current_pid)
+{
+	if (mode == 2)
+	{
+		mode = 1;
+		wait = 0;
+	}
+	if (siginfo.new_bit == 1)
+	{
+		mode = signal_processor(mode, current_pid);
+		if (*current_pid == siginfo.new_pid)
+			wait = 0; 
+	}
+	else
+	{
+		usleep(10);
+		wait++;
+	}
+	if (wait >= 90000)
+	{
+		ft_putstr_fd("\nTimeout: Client dropped.\n", 1);
+		message_handler(0);
+		*current_pid = 0;
+		mode = 2;
+		wait = 0;
+	}
+	return (mode);
 }
 
 static void	signal_handler(int sig, siginfo_t *info, void *ucontext)
@@ -88,8 +114,8 @@ static void	signal_handler(int sig, siginfo_t *info, void *ucontext)
 int	main(void)
 {
 	struct sigaction	s_act;
-	size_t				wait;
 	int					mode;
+	int					current_pid;
 
 	ft_putnbr_fd(getpid(), 1);
 	ft_putchar_fd('\n', 1);
@@ -101,36 +127,9 @@ int	main(void)
 	sigaction(SIGUSR1, &s_act, NULL);
 	sigaction(SIGUSR2, &s_act, NULL);
 	mode = 2;
+	current_pid = 0;
 	while (1)
-	{
-		
-		if (mode == 2)
-		{
-			pause();
-			mode = 0;
-			wait = 0;
-		}
-		else if (mode == 1)
-		{
-			wait = 0;
-			if (wait >= 9000)
-			{
-				safe_kill(siginfo.c_pid, SIGUSR2, "Failed to shutdown client after Timeout");
-				message_handler(0);
-				siginfo.c_pid = 0;
-				mode = 2;
-			}
-			if (siginfo.new_bit == 1)
-			{
-				mode = signal_processor(mode);
-			}
-			++wait;
-			usleep(100);
-		}
-		else
-		{
-			wait = 0;
-			mode = signal_processor(mode);
-		}
-	}
+    {
+		mode = server_mode(mode, 0, &current_pid);
+    }
 }
