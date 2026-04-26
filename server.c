@@ -6,7 +6,7 @@
 /*   By: tobschmi <tobschmi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/21 18:09:43 by tobschmi          #+#    #+#             */
-/*   Updated: 2026/04/26 19:28:08 by tobschmi         ###   ########.fr       */
+/*   Updated: 2026/04/26 21:34:37 by tobschmi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,7 @@ static int	message_handler(int sig)
 	{
 		progress = 0;
 		str_runner = 0;
+		ft_bzero(string, sizeof(string));
 	}
 	else
 		string[str_runner] = (string[str_runner] << 1) ^ (sig == SIGUSR1);
@@ -52,7 +53,10 @@ static int	signal_processor(const int mode, int *current_pid)
 {
 	g_siginfo.new_bit = 0;
 	if (*current_pid == 0)
+	{
 		*current_pid = g_siginfo.new_pid;
+		return (mode);
+	}
 	if (*current_pid != g_siginfo.new_pid)
 	{
 		safe_kill(g_siginfo.new_pid, SIGUSR2, "Failed to dismiss new client.");
@@ -90,10 +94,12 @@ static int	server_mode(int mode, int *wait, int *current_pid)
 	if (*wait >= 90000)
 	{
 		ft_putstr_fd("\nTimeout: Client dropped.\n", 1);
+		g_siginfo.new_pid = 0;
+		g_siginfo.new_bit = 0;
+		g_siginfo.sig = 0;
 		message_handler(0);
 		*current_pid = 0;
 		mode = 1;
-		*wait = 0;
 	}
 	return (mode);
 }
@@ -127,7 +133,7 @@ int	main(void)
 	s_act.sa_sigaction = signal_handler;
 	sigaction(SIGUSR1, &s_act, NULL);
 	sigaction(SIGUSR2, &s_act, NULL);
-	mode = 2;
+	mode = 1;
 	current_pid = 0;
 	wait = 0;
 	while (1)

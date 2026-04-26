@@ -6,7 +6,7 @@
 /*   By: tobschmi <tobschmi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/21 18:09:35 by tobschmi          #+#    #+#             */
-/*   Updated: 2026/04/26 19:31:01 by tobschmi         ###   ########.fr       */
+/*   Updated: 2026/04/26 20:55:22 by tobschmi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,10 @@ static void	send_bit(char character, size_t position, int pid)
 	else
 		error = safe_kill(pid, SIGUSR2, "Error commincating with server\n");
 	if (error)
+	{
+		ft_putendl_fd("Error during communication", 1);
 		exit (1);
+	}
 }
 
 static int	communication_handler(char *string, int pid)
@@ -45,7 +48,7 @@ static int	communication_handler(char *string, int pid)
 	int		wait;
 
 	str_runner = 0;
-	while (str_runner <= ft_strlen(string))
+	while (str_runner <= ft_strlen(string) + 1)
 	{
 		bit_runner = 8;
 		while (bit_runner != 0)
